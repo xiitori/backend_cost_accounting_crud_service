@@ -1,6 +1,5 @@
 package ru.xiitori.crudservice.controllers;
 
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,10 +10,10 @@ import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
 import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.service.ClientService;
-import ru.xiitori.crudservice.utils.ClientNotFoundException;
+import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
-import ru.xiitori.crudservice.utils.RegistrationException;
+import ru.xiitori.crudservice.utils.exceptions.RegistrationException;
 import ru.xiitori.crudservice.validation.ClientDTOValidator;
 
 import java.util.List;

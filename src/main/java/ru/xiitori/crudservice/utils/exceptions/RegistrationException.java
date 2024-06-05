@@ -1,4 +1,4 @@
-package ru.xiitori.crudservice.utils;
+package ru.xiitori.crudservice.utils.exceptions;
 
 public class RegistrationException extends RuntimeException {
 
