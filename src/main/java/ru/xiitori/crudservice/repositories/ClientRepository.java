@@ -15,4 +15,6 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
     boolean existsByEmail(String clientEmail);
 
     boolean existsByUsername(String username);
+
+    void deleteByUsername(String username);
 }

@@ -4,12 +4,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.xiitori.crudservice.dto.ExpenseDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
 import ru.xiitori.crudservice.models.Client;
+import ru.xiitori.crudservice.security.ClientDetails;
 import ru.xiitori.crudservice.service.ClientService;
+import ru.xiitori.crudservice.service.ExpenseService;
 import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
@@ -25,18 +29,21 @@ public class ClientController {
 
     private final ClientService clientService;
 
+    private final ExpenseService expenseService;
+
     private final ModelMapper mapper;
 
     private final ClientDTOValidator clientDTOValidator;
 
     @Autowired
-    public ClientController(ClientService clientService, ModelMapper mapper, ClientDTOValidator clientDTOValidator) {
+    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, ClientDTOValidator clientDTOValidator) {
         this.clientService = clientService;
+        this.expenseService = expenseService;
         this.mapper = mapper;
         this.clientDTOValidator = clientDTOValidator;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public ClientInfoDTO info(@PathVariable("id") int id) {
         Optional<Client> optional = clientService.getClient(id);
 
@@ -45,6 +52,21 @@ public class ClientController {
         }
 
         return mapper.map(optional.get(), ClientInfoDTO.class);
+    }
+
+    @GetMapping("/expenses")
+    public List<ExpenseDTO> getExpenses() {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int clientId = clientDetails.getClient().getId();
+        return expenseService.getAllExpensesByClientId(clientId).stream().map(expense -> mapper.map(expense, ExpenseDTO.class)).toList();
+    }
+
+    @GetMapping("/info")
+    public ClientInfoDTO info() {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Client client = clientDetails.getClient();
+
+        return mapper.map(client, ClientInfoDTO.class);
     }
 
     @GetMapping("/all")
@@ -79,9 +101,9 @@ public class ClientController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteClient(@PathVariable("id") int id) {
-        clientService.deleteClient(id);
+    @DeleteMapping("/{username}")
+    public ResponseEntity<?> deleteClient(@PathVariable("username") String username) {
+        clientService.deleteClient(username);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
