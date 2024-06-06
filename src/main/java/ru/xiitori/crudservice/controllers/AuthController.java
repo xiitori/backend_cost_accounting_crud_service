@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.xiitori.crudservice.dto.LoginDTO;
@@ -52,7 +54,8 @@ public class AuthController {
                         loginDTO.getPassword());
 
         try {
-            daoAuthenticationProvider.authenticate(authInputToken);
+            Authentication authentication = daoAuthenticationProvider.authenticate(authInputToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (BadCredentialsException e) {
             return Map.of("message", "Incorrect credentials!");
         }
@@ -69,11 +72,15 @@ public class AuthController {
             throw new RegistrationException(ErrorUtils.createMessage(bindingResult));
         }
 
-        Client client = mapper.map(clientDTO, Client.class);
+        Client client = convertClientDTO(clientDTO);
         clientService.saveClient(client);
         String token = jwtUtils.createToken(client.getUsername());
 
         return Map.of("jwt-token", token);
+    }
+
+    public Client convertClientDTO(ClientDTO clientDTO) {
+        return mapper.map(clientDTO, Client.class);
     }
 
     @ExceptionHandler(value = RegistrationException.class)

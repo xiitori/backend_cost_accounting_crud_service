@@ -5,8 +5,12 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -27,14 +31,12 @@ public class JWTUtils {
                 .sign(Algorithm.HMAC256(secret));
     }
 
-    public String validateToken(String token) throws JWTVerificationException {
+    public DecodedJWT validateToken(String token) throws JWTVerificationException {
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(secret))
                 .withIssuer("xiitori")
                 .withSubject("Client details")
                 .build();
 
-        DecodedJWT decodedJWT = jwtVerifier.verify(token);
-
-        return decodedJWT.getClaim("username").asString();
+        return jwtVerifier.verify(token);
     }
 }

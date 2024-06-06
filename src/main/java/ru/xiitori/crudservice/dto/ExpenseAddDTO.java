@@ -2,23 +2,13 @@ package ru.xiitori.crudservice.dto;
 
 import ru.xiitori.crudservice.models.types.ExpenseType;
 
-public class ExpenseDTO {
-
-    private int id;
+public class ExpenseAddDTO {
 
     private ExpenseType expenseType;
 
     private String description;
 
-    public ExpenseDTO() {
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    public ExpenseAddDTO() {
     }
 
     public ExpenseType getExpenseType() {

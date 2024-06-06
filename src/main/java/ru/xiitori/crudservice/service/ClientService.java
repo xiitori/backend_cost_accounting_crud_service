@@ -61,8 +61,8 @@ public class ClientService {
     }
 
     @Transactional
-    public void deleteClient(int id) {
-        clientRepository.deleteById(id);
+    public void deleteClient(String username) {
+        clientRepository.deleteByUsername(username);
     }
 
 }
