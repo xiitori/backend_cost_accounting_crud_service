@@ -1,8 +1,14 @@
 package ru.xiitori.crudservice.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.xiitori.crudservice.models.types.ExpenseType;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "expense")
 public class Expense {
@@ -23,43 +29,12 @@ public class Expense {
     @Column(name = "description")
     private String description;
 
-    public Expense() {
-    }
+    @Column(name = "value")
+    private double value;
 
-    public Expense(ExpenseType expenseType, String description) {
+    public Expense(ExpenseType expenseType, String description, double value) {
         this.expenseType = expenseType;
         this.description = description;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    public ExpenseType getExpenseType() {
-        return expenseType;
-    }
-
-    public void setExpenseType(ExpenseType expenseType) {
-        this.expenseType = expenseType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+        this.value = value;
     }
 }

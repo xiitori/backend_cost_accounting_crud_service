@@ -4,16 +4,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.crudservice.dto.ExpenseDTO;
+import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
+import ru.xiitori.crudservice.dto.income.IncomeDTO;
 import ru.xiitori.crudservice.models.Client;
-import ru.xiitori.crudservice.security.ClientDetails;
 import ru.xiitori.crudservice.service.ClientService;
 import ru.xiitori.crudservice.service.ExpenseService;
+import ru.xiitori.crudservice.service.IncomeService;
 import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
@@ -35,17 +35,25 @@ public class ClientController {
 
     private final ClientDTOValidator clientDTOValidator;
 
+    private final IncomeService incomeService;
+
     @Autowired
-    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, ClientDTOValidator clientDTOValidator) {
+    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, ClientDTOValidator clientDTOValidator, IncomeService incomeService) {
         this.clientService = clientService;
         this.expenseService = expenseService;
         this.mapper = mapper;
         this.clientDTOValidator = clientDTOValidator;
+        this.incomeService = incomeService;
     }
 
-    @GetMapping("/info/{id}")
-    public ClientInfoDTO info(@PathVariable("id") int id) {
-        Optional<Client> optional = clientService.getClient(id);
+    @GetMapping("")
+    public List<ClientInfoDTO> getClients() {
+        return clientService.getClients().stream().map(obj -> mapper.map(obj, ClientInfoDTO.class)).toList();
+    }
+
+    @GetMapping("/{id}")
+    public ClientInfoDTO getClient(@PathVariable("id") int id) {
+        Optional<Client> optional = clientService.getClientById(id);
 
         if (optional.isEmpty()) {
             throw new ClientNotFoundException("Client with id " + id + " not found");
@@ -54,32 +62,18 @@ public class ClientController {
         return mapper.map(optional.get(), ClientInfoDTO.class);
     }
 
-    @GetMapping("/expenses")
-    public List<ExpenseDTO> getExpenses() {
-        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        int clientId = clientDetails.getClient().getId();
-        return expenseService.getAllExpensesByClientId(clientId).stream().map(expense -> mapper.map(expense, ExpenseDTO.class)).toList();
+    @GetMapping("/{id}/expenses")
+    public List<ExpenseDTO> getExpenses(@PathVariable("id") int id) {
+        return expenseService.getExpensesByClientId(id).stream()
+                .map(expense -> mapper.map(expense, ExpenseDTO.class)).toList();
     }
 
-    @GetMapping("/info")
-    public ClientInfoDTO info() {
-        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Client client = clientDetails.getClient();
-
-        return mapper.map(client, ClientInfoDTO.class);
+    @GetMapping("/{id}/incomes")
+    public List<IncomeDTO> getIncomes(@PathVariable("id") int id) {
+        return incomeService.getAllIncomesByClientId(id).stream().map(income -> mapper.map(income, IncomeDTO.class)).toList();
     }
 
-    @GetMapping("/all")
-    public List<ClientInfoDTO> getAllClients() {
-        return clientService.getAll().stream().map(obj -> mapper.map(obj, ClientInfoDTO.class)).toList();
-    }
-
-    /*
-    в update нужно добавить валидацию, нельзя использовать валидацию регистрации, потому что запросом можно и не менять
-    username и email. либо добавлять другой класс валидации, либо подключить security и получить из сессии текущего
-    пользователя и сравнить с его id при валидации
-     */
-
+    //TODO добавить другую валидацию на апдейт, либо внутри прошлой достать текущего клиента из контекста
     @PostMapping("/{id}")
     public ResponseEntity<?> updateClient(@PathVariable("id") int id, @RequestBody ClientDTO clientDTO,
                                           BindingResult result) {
@@ -89,7 +83,7 @@ public class ClientController {
             throw new RegistrationException(ErrorUtils.createMessage(result));
         }
 
-        Optional<Client> clientToUpdate = clientService.getClient(id);
+        Optional<Client> clientToUpdate = clientService.getClientById(id);
 
         if (clientToUpdate.isEmpty()) {
             throw new ClientNotFoundException("Client with id " + id + " not found");
@@ -102,8 +96,15 @@ public class ClientController {
     }
 
     @DeleteMapping("/{username}")
-    public ResponseEntity<?> deleteClient(@PathVariable("username") String username) {
+    public ResponseEntity<?> deleteClientByUsername(@PathVariable("username") String username) {
         clientService.deleteClient(username);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteClientById(@PathVariable("id") int id) {
+        clientService.deleteClient(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

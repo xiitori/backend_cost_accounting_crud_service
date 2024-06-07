@@ -20,7 +20,11 @@ public class ExpenseService {
         this.expenseRepository = expenseRepository;
     }
 
-    public List<Expense> getAllExpensesByClientId(int id) {
+    public List<Expense> getExpenses() {
+        return expenseRepository.findAll();
+    }
+
+    public List<Expense> getExpensesByClientId(int id) {
         return expenseRepository.findExpensesByClient_Id(id);
     }
 

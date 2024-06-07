@@ -1,8 +1,14 @@
 package ru.xiitori.crudservice.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.xiitori.crudservice.models.types.IncomeType;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "income")
 public class Income {
@@ -23,43 +29,11 @@ public class Income {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "value")
+    private double value;
+
     public Income(IncomeType incomeType, String description) {
         this.incomeType = incomeType;
-        this.description = description;
-    }
-
-    public Income() {
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    public IncomeType getIncomeType() {
-        return incomeType;
-    }
-
-    public void setIncomeType(IncomeType incomeType) {
-        this.incomeType = incomeType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
     }
 }

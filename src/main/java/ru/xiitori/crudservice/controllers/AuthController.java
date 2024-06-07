@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.crudservice.dto.LoginDTO;
+import ru.xiitori.crudservice.dto.auth.LoginDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.service.ClientService;
