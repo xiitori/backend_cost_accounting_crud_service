@@ -31,7 +31,7 @@ public class ExpenseController {
 
     @GetMapping()
     public List<AdminExpenseDTO> getExpenses() {
-        return expenseService.getExpenses().stream().map(this::convertToAdminExpenseDTO).toList();
+        return expenseService.getExpenses().stream().map(expense -> mapper.map(expense, AdminExpenseDTO.class)).toList();
     }
 
     @GetMapping("/{id}")
@@ -42,14 +42,6 @@ public class ExpenseController {
             throw new ExpenseNotFoundException("There is no expense with id " + id);
         }
 
-        return convertToAdminExpenseDTO(optional.get());
-    }
-
-    public AdminExpenseDTO convertToAdminExpenseDTO(Expense expense) {
-        AdminExpenseDTO adminExpenseDTO = mapper.map(expense, AdminExpenseDTO.class);
-
-        adminExpenseDTO.setClientUsername(expense.getClient().getUsername());
-
-        return adminExpenseDTO;
+        return mapper.map(optional.get(), AdminExpenseDTO.class);
     }
 }

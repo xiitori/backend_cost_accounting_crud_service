@@ -6,17 +6,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
+import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.income.IncomeDTO;
 import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.service.ClientService;
 import ru.xiitori.crudservice.service.ExpenseService;
 import ru.xiitori.crudservice.service.IncomeService;
-import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
+import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.RegistrationException;
 import ru.xiitori.crudservice.validation.ClientDTOValidator;
 
@@ -70,7 +70,8 @@ public class ClientController {
 
     @GetMapping("/{id}/incomes")
     public List<IncomeDTO> getIncomes(@PathVariable("id") int id) {
-        return incomeService.getAllIncomesByClientId(id).stream().map(income -> mapper.map(income, IncomeDTO.class)).toList();
+        return incomeService.getIncomesByClientId(id).stream()
+                .map(income -> mapper.map(income, IncomeDTO.class)).toList();
     }
 
     //TODO добавить другую валидацию на апдейт, либо внутри прошлой достать текущего клиента из контекста
@@ -111,6 +112,6 @@ public class ClientController {
 
     @ExceptionHandler(value = ClientNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleClientNotFound(ClientNotFoundException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
 }

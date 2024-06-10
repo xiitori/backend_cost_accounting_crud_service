@@ -18,7 +18,9 @@ import ru.xiitori.crudservice.security.ClientDetails;
 import ru.xiitori.crudservice.service.ExpenseService;
 import ru.xiitori.crudservice.service.IncomeService;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
+import ru.xiitori.crudservice.utils.exceptions.EntityNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.ExpenseNotFoundException;
+import ru.xiitori.crudservice.utils.exceptions.IncomeNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,8 +62,34 @@ public class ProfileController {
     public List<IncomeDTO> getIncomes() {
         ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int clientId = clientDetails.getClient().getId();
-        return incomeService.getAllIncomesByClientId(clientId).stream()
+        return incomeService.getIncomesByClientId(clientId).stream()
                 .map(expense -> modelMapper.map(expense, IncomeDTO.class)).toList();
+    }
+
+    @PostMapping("/expenses")
+    public ResponseEntity<?> addExpense(@RequestBody ExpenseAddDTO expenseAddDTO) {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Client client = clientDetails.getClient();
+
+        Expense expense = modelMapper.map(expenseAddDTO, Expense.class);
+        expense.setClient(client);
+
+        expenseService.saveExpense(expense);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/incomes")
+    public ResponseEntity<?> addIncome(@RequestBody IncomeAddDTO incomeAddDTO) {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Client client = clientDetails.getClient();
+
+        Income income = modelMapper.map(incomeAddDTO, Income.class);
+        income.setClient(client);
+
+        incomeService.saveIncome(income);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/expenses/{id}")
@@ -79,33 +107,15 @@ public class ProfileController {
 
     @GetMapping("/incomes/{id}")
     public IncomeDTO getIncome(@PathVariable("id") int id) {
-        return modelMapper.map(incomeService.getAllIncomesByClientId(id), IncomeDTO.class);
-    }
-
-    @PostMapping("/add/expense")
-    public ResponseEntity<?> addExpense(@RequestBody ExpenseAddDTO expenseAddDTO) {
         ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Client client = clientDetails.getClient();
+        Optional<Income> optional = incomeService.getIncomeById(id);
 
-        Expense expense = modelMapper.map(expenseAddDTO, Expense.class);
-        expense.setClient(client);
+        if (optional.isEmpty() || optional.get().getClient().getId() != client.getId()) {
+            throw new IncomeNotFoundException("Income with id " + id + " not found!");
+        }
 
-        expenseService.saveExpense(expense);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping("/add/income")
-    public ResponseEntity<?> addIncome(@RequestBody IncomeAddDTO incomeAddDTO) {
-        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Client client = clientDetails.getClient();
-
-        Income income = modelMapper.map(incomeAddDTO, Income.class);
-        income.setClient(client);
-
-        incomeService.saveIncome(income);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return modelMapper.map(optional.get(), IncomeDTO.class);
     }
 
     @PostMapping("/expenses/{id}")
@@ -119,8 +129,8 @@ public class ProfileController {
     }
 
     @PostMapping("/incomes/{id}")
-    public ResponseEntity<?> updateIncome(@PathVariable("id") int id, @RequestBody IncomeDTO incomeDTO) {
-        Income income = modelMapper.map(incomeDTO, Income.class);
+    public ResponseEntity<?> updateIncome(@PathVariable("id") int id, @RequestBody IncomeAddDTO incomeAddDTO) {
+        Income income = modelMapper.map(incomeAddDTO, Income.class);
         income.setId(id);
 
         incomeService.updateIncome(income);
@@ -137,13 +147,13 @@ public class ProfileController {
 
     @DeleteMapping("/incomes/{id}")
     public ResponseEntity<?> deleteIncome(@PathVariable("id") int id) {
-        incomeService.getAllIncomesByClientId(id);
+        incomeService.deleteIncomeById(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ExceptionHandler(ExpenseNotFoundException.class)
-    public ResponseEntity<?> handleException(ExpenseNotFoundException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<?> handleException(EntityNotFoundException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
 }
