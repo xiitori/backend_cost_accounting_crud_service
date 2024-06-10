@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.crudservice.dto.LoginDTO;
+import ru.xiitori.crudservice.dto.auth.LoginDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.service.ClientService;
@@ -72,19 +72,15 @@ public class AuthController {
             throw new RegistrationException(ErrorUtils.createMessage(bindingResult));
         }
 
-        Client client = convertClientDTO(clientDTO);
+        Client client = mapper.map(clientDTO, Client.class);
         clientService.saveClient(client);
         String token = jwtUtils.createToken(client.getUsername());
 
         return Map.of("jwt-token", token);
     }
 
-    public Client convertClientDTO(ClientDTO clientDTO) {
-        return mapper.map(clientDTO, Client.class);
-    }
-
     @ExceptionHandler(value = RegistrationException.class)
     public ResponseEntity<ExceptionResponse> handleException(RegistrationException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
 }

@@ -24,12 +24,8 @@ public class ClientService {
         this.clientRepository = clientRepository;
     }
 
-    public List<Client> getAll() {
+    public List<Client> getClients() {
         return clientRepository.findAll();
-    }
-
-    public Optional<Client> getClient(int id) {
-        return clientRepository.findById(id);
     }
 
     @Transactional
@@ -40,8 +36,13 @@ public class ClientService {
 
     @Transactional
     public void saveClient(Client client) {
+        client.setRole("ROLE_USER");
         client.setPassword(passwordEncoder.encode(client.getPassword()));
         clientRepository.save(client);
+    }
+
+    public Optional<Client> getClientById(int id) {
+        return clientRepository.findById(id);
     }
 
     public Optional<Client> getClientByUsername(String name) {
@@ -63,6 +64,11 @@ public class ClientService {
     @Transactional
     public void deleteClient(String username) {
         clientRepository.deleteByUsername(username);
+    }
+
+    @Transactional
+    public void deleteClient(int id) {
+        clientRepository.deleteById(id);
     }
 
 }

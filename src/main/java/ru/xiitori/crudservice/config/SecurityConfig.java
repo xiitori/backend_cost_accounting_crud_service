@@ -38,6 +38,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
+                        .requestMatchers("/profile", "/profile/expenses", "/profile/incomes",
+                                "/profile/expenses/{id}", "/profile/incomes/{id}",
+                                "/profile/add/expense", "/profile/add/income")
+                        .hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/clients", "/clients/{id}", "/clients/{id}/expenses",
+                                "/clients/{id}/incomes", "/clients/{username}", "/expenses", "/expenses/{id}",
+                                "/incomes", "/incomes/{id}")
+                        .hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(management -> management
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
