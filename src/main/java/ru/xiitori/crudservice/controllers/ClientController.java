@@ -1,5 +1,6 @@
 package ru.xiitori.crudservice.controllers;
 
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,8 +18,8 @@ import ru.xiitori.crudservice.service.IncomeService;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
-import ru.xiitori.crudservice.utils.exceptions.RegistrationException;
-import ru.xiitori.crudservice.validation.ClientDTOValidator;
+import ru.xiitori.crudservice.utils.exceptions.UpdateException;
+import ru.xiitori.crudservice.validation.ClientDTOUpdateValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,17 +34,17 @@ public class ClientController {
 
     private final ModelMapper mapper;
 
-    private final ClientDTOValidator clientDTOValidator;
-
     private final IncomeService incomeService;
 
+    private final ClientDTOUpdateValidator clientDTOUpdateValidator;
+
     @Autowired
-    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, ClientDTOValidator clientDTOValidator, IncomeService incomeService) {
+    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, IncomeService incomeService, ClientDTOUpdateValidator clientDTOUpdateValidator) {
         this.clientService = clientService;
         this.expenseService = expenseService;
         this.mapper = mapper;
-        this.clientDTOValidator = clientDTOValidator;
         this.incomeService = incomeService;
+        this.clientDTOUpdateValidator = clientDTOUpdateValidator;
     }
 
     @GetMapping("")
@@ -74,14 +75,14 @@ public class ClientController {
                 .map(income -> mapper.map(income, IncomeDTO.class)).toList();
     }
 
-    //TODO добавить другую валидацию на апдейт, либо внутри прошлой достать текущего клиента из контекста
+    //TODO пока пойдет так, но в будущем нужно отдельное DTO под апдейт, потому что хочется уметь только одно поле редачить
     @PostMapping("/{id}")
-    public ResponseEntity<?> updateClient(@PathVariable("id") int id, @RequestBody ClientDTO clientDTO,
+    public ResponseEntity<?> updateClient(@PathVariable("id") int id, @RequestBody @Valid ClientDTO clientDTO,
                                           BindingResult result) {
-        clientDTOValidator.validate(clientDTO, result);
+        clientDTOUpdateValidator.validate(clientDTO, result);
 
         if (result.hasErrors()) {
-            throw new RegistrationException(ErrorUtils.createMessage(result));
+            throw new UpdateException(ErrorUtils.createMessage(result));
         }
 
         Optional<Client> clientToUpdate = clientService.getClientById(id);
@@ -112,6 +113,11 @@ public class ClientController {
 
     @ExceptionHandler(value = ClientNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleClientNotFound(ClientNotFoundException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = UpdateException.class)
+    public ResponseEntity<ExceptionResponse> handleUpdate(UpdateException ex) {
         return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
 }

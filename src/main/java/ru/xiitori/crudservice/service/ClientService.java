@@ -30,7 +30,10 @@ public class ClientService {
 
     @Transactional
     public void updateClient(Client client, int id) {
+        String role = clientRepository.findById(id).get().getRole();
+
         client.setId(id);
+        client.setRole(role);
         clientRepository.save(client);
     }
 

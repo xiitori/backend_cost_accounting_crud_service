@@ -16,6 +16,7 @@ public class ErrorUtils {
                     .append(error.getDefaultMessage())
                     .append("; ");
         }
+        errors.deleteCharAt(errors.length() - 1);
 
         return errors.toString();
     }

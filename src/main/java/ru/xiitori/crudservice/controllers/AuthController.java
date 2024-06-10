@@ -18,6 +18,7 @@ import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.service.ClientService;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
+import ru.xiitori.crudservice.utils.exceptions.LoginException;
 import ru.xiitori.crudservice.utils.exceptions.RegistrationException;
 import ru.xiitori.crudservice.utils.jwt.JWTUtils;
 import ru.xiitori.crudservice.validation.ClientDTOValidator;
@@ -48,17 +49,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> performLogin(@RequestBody LoginDTO loginDTO) {
+    public Map<String, String> performLogin(@RequestBody @Valid LoginDTO loginDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new LoginException(ErrorUtils.createMessage(bindingResult));
+        }
+
         UsernamePasswordAuthenticationToken authInputToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(),
                         loginDTO.getPassword());
 
-        try {
-            Authentication authentication = daoAuthenticationProvider.authenticate(authInputToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (BadCredentialsException e) {
-            return Map.of("message", "Incorrect credentials!");
-        }
+        Authentication authentication = daoAuthenticationProvider.authenticate(authInputToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtUtils.createToken(loginDTO.getUsername());
         return Map.of("jwt-token", token);
@@ -82,5 +83,15 @@ public class AuthController {
     @ExceptionHandler(value = RegistrationException.class)
     public ResponseEntity<ExceptionResponse> handleException(RegistrationException ex) {
         return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionResponse> handleException(BadCredentialsException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(LoginException.class)
+    public ResponseEntity<ExceptionResponse> handleException(LoginException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.UNAUTHORIZED);
     }
 }

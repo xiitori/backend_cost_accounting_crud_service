@@ -118,6 +118,7 @@ public class ProfileController {
         return modelMapper.map(optional.get(), IncomeDTO.class);
     }
 
+    //TODO апдейты не работают скорее всего, потому что надо пользователя из контекста достать
     @PostMapping("/expenses/{id}")
     public ResponseEntity<?> updateExpense(@PathVariable("id") int id, @RequestBody ExpenseAddDTO expenseAddDTO) {
         Expense expense = modelMapper.map(expenseAddDTO, Expense.class);

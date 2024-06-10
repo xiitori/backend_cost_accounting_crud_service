@@ -1,21 +1,23 @@
 package ru.xiitori.crudservice.validation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
+import ru.xiitori.crudservice.security.ClientDetails;
 import ru.xiitori.crudservice.service.ClientService;
 
 import java.time.LocalDate;
 
 @Component
-public class ClientDTOValidator implements Validator {
+public class ClientDTOUpdateValidator implements Validator {
 
     private final ClientService clientService;
 
     @Autowired
-    public ClientDTOValidator(ClientService clientService) {
+    public ClientDTOUpdateValidator(ClientService clientService) {
         this.clientService = clientService;
     }
 
@@ -32,11 +34,16 @@ public class ClientDTOValidator implements Validator {
         String email = clientDTO.getEmail();
         LocalDate date = clientDTO.getDateOfBirth();
 
-        if (clientService.existsClientByUsername(username)) {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int clientId = clientDetails.getClient().getId();
+
+        if (clientService.existsClientByUsername(username) &&
+                clientService.getClientByUsername(username).get().getId() != clientId) {
             errors.rejectValue("username", null, "Username already exists");
         }
 
-        if (clientService.existsClientByEmail(email)) {
+        if (clientService.existsClientByEmail(email) &&
+                clientService.getClientByEmail(email).get().getId() != clientId) {
             errors.rejectValue("email", null, "Email already exists");
         }
 
@@ -54,6 +61,6 @@ public class ClientDTOValidator implements Validator {
     }
 
     public boolean isInvalidDate(LocalDate localDate) {
-        return localDate.isBefore(LocalDate.of(1920, 1, 1))|| localDate.isAfter(LocalDate.now());
+        return localDate.isBefore(LocalDate.of(1920, 1, 1)) || localDate.isAfter(LocalDate.now());
     }
 }
