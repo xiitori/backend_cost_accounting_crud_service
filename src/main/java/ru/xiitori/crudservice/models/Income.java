@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.xiitori.crudservice.models.types.IncomeType;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,6 +33,9 @@ public class Income {
 
     @Column(name = "value")
     private double value;
+
+    @Column(name = "made_at")
+    private Date madeAt;
 
     public Income(IncomeType incomeType, String description) {
         this.incomeType = incomeType;

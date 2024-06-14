@@ -1,4 +1,4 @@
-package ru.xiitori.crudservice.service;
+package ru.xiitori.crudservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,11 +29,8 @@ public class ClientService {
     }
 
     @Transactional
-    public void updateClient(Client client, int id) {
-        String role = clientRepository.findById(id).get().getRole();
+    public void updateClient(int id, Client client) {
 
-        client.setId(id);
-        client.setRole(role);
         clientRepository.save(client);
     }
 

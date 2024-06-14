@@ -7,7 +7,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.security.ClientDetails;
-import ru.xiitori.crudservice.service.ClientService;
+import ru.xiitori.crudservice.services.ClientService;
 
 import java.time.LocalDate;
 

@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.xiitori.crudservice.models.types.ExpenseType;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,6 +34,9 @@ public class Expense {
 
     @Column(name = "value")
     private double value;
+
+    @Column(name = "made_at")
+    private LocalDateTime madeAt;
 
     public Expense(ExpenseType expenseType, String description, double value) {
         this.expenseType = expenseType;

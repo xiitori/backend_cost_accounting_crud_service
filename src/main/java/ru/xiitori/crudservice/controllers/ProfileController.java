@@ -15,8 +15,8 @@ import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.models.Expense;
 import ru.xiitori.crudservice.models.Income;
 import ru.xiitori.crudservice.security.ClientDetails;
-import ru.xiitori.crudservice.service.ExpenseService;
-import ru.xiitori.crudservice.service.IncomeService;
+import ru.xiitori.crudservice.services.ExpenseService;
+import ru.xiitori.crudservice.services.IncomeService;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.EntityNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.ExpenseNotFoundException;
@@ -122,9 +122,8 @@ public class ProfileController {
     @PostMapping("/expenses/{id}")
     public ResponseEntity<?> updateExpense(@PathVariable("id") int id, @RequestBody ExpenseAddDTO expenseAddDTO) {
         Expense expense = modelMapper.map(expenseAddDTO, Expense.class);
-        expense.setId(id);
 
-        expenseService.updateExpense(expense);
+        expenseService.updateExpense(id, expense);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -132,9 +131,8 @@ public class ProfileController {
     @PostMapping("/incomes/{id}")
     public ResponseEntity<?> updateIncome(@PathVariable("id") int id, @RequestBody IncomeAddDTO incomeAddDTO) {
         Income income = modelMapper.map(incomeAddDTO, Income.class);
-        income.setId(id);
 
-        incomeService.updateIncome(income);
+        incomeService.updateIncome(id, income);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

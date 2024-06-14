@@ -12,9 +12,9 @@ import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
 import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.income.IncomeDTO;
 import ru.xiitori.crudservice.models.Client;
-import ru.xiitori.crudservice.service.ClientService;
-import ru.xiitori.crudservice.service.ExpenseService;
-import ru.xiitori.crudservice.service.IncomeService;
+import ru.xiitori.crudservice.services.ClientService;
+import ru.xiitori.crudservice.services.ExpenseService;
+import ru.xiitori.crudservice.services.IncomeService;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
@@ -92,7 +92,7 @@ public class ClientController {
         }
 
         Client client = mapper.map(clientDTO, Client.class);
-        clientService.updateClient(client, id);
+        clientService.updateClient(id, client);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

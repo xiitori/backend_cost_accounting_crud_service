@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.xiitori.crudservice.dto.auth.LoginDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.models.Client;
-import ru.xiitori.crudservice.service.ClientService;
+import ru.xiitori.crudservice.services.ClientService;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.LoginException;

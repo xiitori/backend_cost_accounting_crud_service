@@ -7,21 +7,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.xiitori.crudservice.service.ClientDetailsService;
+import ru.xiitori.crudservice.services.ClientDetailsService;
 import ru.xiitori.crudservice.utils.jwt.JWTUtils;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
-import java.util.Collections;
 
 @Component
 public class JWTFilter extends OncePerRequestFilter {
@@ -59,5 +53,12 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
+            throws ServletException {
+        String path = request.getRequestURI();
+        return "/auth/login".equals(path);
     }
 }
