@@ -30,8 +30,13 @@ public class ClientService {
 
     @Transactional
     public void updateClient(int id, Client client) {
+        Client clientToUpdate = clientRepository.getReferenceById(id);
 
-        clientRepository.save(client);
+        if (client.getUsername() != null) {
+            clientToUpdate.setUsername(client.getUsername());
+        }
+
+        clientRepository.save(clientToUpdate);
     }
 
     @Transactional
@@ -71,4 +76,7 @@ public class ClientService {
         clientRepository.deleteById(id);
     }
 
+    public boolean existsClientById(int id) {
+        return clientRepository.existsById(id);
+    }
 }

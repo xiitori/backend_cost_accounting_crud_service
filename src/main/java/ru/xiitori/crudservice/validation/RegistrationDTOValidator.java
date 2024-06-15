@@ -4,33 +4,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import ru.xiitori.crudservice.dto.client.ClientDTO;
+import ru.xiitori.crudservice.dto.auth.RegistrationDTO;
 import ru.xiitori.crudservice.services.ClientService;
 
 import java.time.LocalDate;
 
 @Component
-public class ClientDTOValidator implements Validator {
+public class RegistrationDTOValidator implements Validator {
 
     private final ClientService clientService;
 
     @Autowired
-    public ClientDTOValidator(ClientService clientService) {
+    public RegistrationDTOValidator(ClientService clientService) {
         this.clientService = clientService;
     }
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return ClientDTO.class.equals(clazz);
+        return RegistrationDTO.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        ClientDTO clientDTO = (ClientDTO) target;
+        RegistrationDTO registrationDTO = (RegistrationDTO) target;
 
-        String username = clientDTO.getUsername();
-        String email = clientDTO.getEmail();
-        LocalDate date = clientDTO.getDateOfBirth();
+        String username = registrationDTO.getUsername();
+        String email = registrationDTO.getEmail();
+        LocalDate date = registrationDTO.getDateOfBirth();
 
         if (clientService.existsClientByUsername(username)) {
             errors.rejectValue("username", null, "Username already exists");

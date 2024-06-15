@@ -7,14 +7,13 @@ import lombok.Setter;
 import ru.xiitori.crudservice.models.types.ExpenseType;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "expense")
-public class Expense {
+public class Expense implements Note {
 
     @Id
     @Column(name = "id")

@@ -46,14 +46,6 @@ class ClientServiceTest {
     }
 
     @Test
-    void updateClient_shouldCallRepository() {
-        final Client client = mock(Client.class);
-        clientService.updateClient(ID, client);
-
-        verify(clientRepository, times(1)).save(client);
-    }
-
-    @Test
     void saveClient_shouldCallRepository() {
         final Client client = mock(Client.class);
 

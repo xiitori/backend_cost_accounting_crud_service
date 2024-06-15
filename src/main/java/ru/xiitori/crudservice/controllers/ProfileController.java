@@ -2,6 +2,7 @@ package ru.xiitori.crudservice.controllers;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +23,9 @@ import ru.xiitori.crudservice.utils.exceptions.EntityNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.ExpenseNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.IncomeNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -142,6 +145,19 @@ public class ProfileController {
         expenseService.deleteExpenseById(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getStatistics(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH-mm-ss") LocalDateTime from,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH-mm-ss") LocalDateTime to) {
+        List<Expense> expenses = expenseService.getExpensesFromDateToDate(from, to);
+        List<Income> incomes = incomeService.getIncomesFromDateToDate(from, to);
+
+        return new ResponseEntity<>(Map.of(
+                "expenses", expenses.stream().map(expense -> modelMapper.map(expense, ExpenseDTO.class)),
+                "incomes", incomes.stream().map(income -> modelMapper.map(income, IncomeDTO.class))),
+                HttpStatus.OK);
     }
 
     @DeleteMapping("/incomes/{id}")

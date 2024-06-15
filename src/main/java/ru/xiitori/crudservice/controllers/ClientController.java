@@ -1,13 +1,10 @@
 package ru.xiitori.crudservice.controllers;
 
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
 import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.income.IncomeDTO;
@@ -15,11 +12,9 @@ import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.services.ClientService;
 import ru.xiitori.crudservice.services.ExpenseService;
 import ru.xiitori.crudservice.services.IncomeService;
-import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.UpdateException;
-import ru.xiitori.crudservice.validation.ClientDTOUpdateValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,15 +31,12 @@ public class ClientController {
 
     private final IncomeService incomeService;
 
-    private final ClientDTOUpdateValidator clientDTOUpdateValidator;
-
     @Autowired
-    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, IncomeService incomeService, ClientDTOUpdateValidator clientDTOUpdateValidator) {
+    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, IncomeService incomeService) {
         this.clientService = clientService;
         this.expenseService = expenseService;
         this.mapper = mapper;
         this.incomeService = incomeService;
-        this.clientDTOUpdateValidator = clientDTOUpdateValidator;
     }
 
     @GetMapping("")
@@ -75,29 +67,7 @@ public class ClientController {
                 .map(income -> mapper.map(income, IncomeDTO.class)).toList();
     }
 
-    //TODO пока пойдет так, но в будущем нужно отдельное DTO под апдейт, потому что хочется уметь только одно поле редачить
-    @PostMapping("/{id}")
-    public ResponseEntity<?> updateClient(@PathVariable("id") int id, @RequestBody @Valid ClientDTO clientDTO,
-                                          BindingResult result) {
-        clientDTOUpdateValidator.validate(clientDTO, result);
-
-        if (result.hasErrors()) {
-            throw new UpdateException(ErrorUtils.createMessage(result));
-        }
-
-        Optional<Client> clientToUpdate = clientService.getClientById(id);
-
-        if (clientToUpdate.isEmpty()) {
-            throw new ClientNotFoundException("Client with id " + id + " not found");
-        }
-
-        Client client = mapper.map(clientDTO, Client.class);
-        clientService.updateClient(id, client);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{username}")
+    @DeleteMapping("/username/{username}")
     public ResponseEntity<?> deleteClientByUsername(@PathVariable("username") String username) {
         clientService.deleteClient(username);
 

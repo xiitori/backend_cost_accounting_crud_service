@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.xiitori.crudservice.models.Income;
 import ru.xiitori.crudservice.repositories.IncomeRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,5 +47,9 @@ public class IncomeService {
     @Transactional
     public void updateIncome(int id, Income income) {
         incomeRepository.save(income);
+    }
+
+    public List<Income> getIncomesFromDateToDate(LocalDateTime from, LocalDateTime to) {
+        return incomeRepository.findIncomesByMadeAtBetween(from, to);
     }
 }
