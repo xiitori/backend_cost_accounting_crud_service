@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
 import ru.xiitori.crudservice.dto.expense.ExpenseAddDTO;
@@ -16,12 +17,14 @@ import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.models.Expense;
 import ru.xiitori.crudservice.models.Income;
 import ru.xiitori.crudservice.security.ClientDetails;
+import ru.xiitori.crudservice.services.ClientService;
 import ru.xiitori.crudservice.services.ExpenseService;
 import ru.xiitori.crudservice.services.IncomeService;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.EntityNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.ExpenseNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.IncomeNotFoundException;
+import ru.xiitori.crudservice.utils.exceptions.UpdateException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,11 +41,16 @@ public class ProfileController {
 
     private final IncomeService incomeService;
 
+    private final ClientService clientService;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public ProfileController(ModelMapper modelMapper, ExpenseService expenseService, IncomeService incomeService) {
+    public ProfileController(ModelMapper modelMapper, ExpenseService expenseService, IncomeService incomeService, ClientService clientService, PasswordEncoder passwordEncoder) {
         this.modelMapper = modelMapper;
         this.expenseService = expenseService;
         this.incomeService = incomeService;
+        this.clientService = clientService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping()
@@ -51,6 +59,32 @@ public class ProfileController {
         Client client = clientDetails.getClient();
 
         return modelMapper.map(client, ClientInfoDTO.class);
+    }
+
+    @PostMapping("/updateUsername")
+    public ResponseEntity<?> updateClientUsername(@RequestParam("username") String username) {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Client client = clientDetails.getClient();
+
+        clientService.changeClientUsername(client.getId(), username);
+
+        return new ResponseEntity<>("Client updated successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/updatePassword")
+    public ResponseEntity<?> updateClientPassword(@RequestParam("old_password") String oldPassword,
+                                                  @RequestParam("new_password") String newPassword) {
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Client client = clientDetails.getClient();
+
+        if (!passwordEncoder.matches(oldPassword, client.getPassword())) {
+            throw new UpdateException("Password does not match");
+        }
+
+        clientService.changeClientPassword(client.getId(), newPassword);
+
+        return new ResponseEntity<>("Client updated successfully", HttpStatus.OK);
     }
 
     @GetMapping("/expenses")

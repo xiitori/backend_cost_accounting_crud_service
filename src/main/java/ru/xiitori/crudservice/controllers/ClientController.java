@@ -85,9 +85,4 @@ public class ClientController {
     public ResponseEntity<ExceptionResponse> handleClientNotFound(ClientNotFoundException ex) {
         return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
-
-    @ExceptionHandler(value = UpdateException.class)
-    public ResponseEntity<ExceptionResponse> handleUpdate(UpdateException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
-    }
 }

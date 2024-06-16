@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.xiitori.crudservice.utils.exceptions.UpdateException;
 
 import java.time.format.DateTimeParseException;
 
@@ -20,5 +21,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e) {
         return new ResponseEntity<>(new ExceptionResponse(e), HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(value = UpdateException.class)
+    public ResponseEntity<ExceptionResponse> handleUpdate(UpdateException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
 }

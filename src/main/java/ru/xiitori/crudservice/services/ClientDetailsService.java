@@ -31,4 +31,6 @@ public class ClientDetailsService implements UserDetailsService {
 
         return new ClientDetails(client.get());
     }
+
+
 }
