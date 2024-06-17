@@ -1,10 +1,13 @@
 package ru.xiitori.crudservice.services;
 
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.repositories.ClientRepository;
@@ -12,6 +15,7 @@ import ru.xiitori.crudservice.repositories.ClientRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -27,8 +31,8 @@ class ClientServiceTest {
     @Mock
     ClientRepository clientRepository;
 
-    @Mock
-    PasswordEncoder passwordEncoder;
+    @Spy
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @InjectMocks
     ClientService clientService;
@@ -47,7 +51,8 @@ class ClientServiceTest {
 
     @Test
     void saveClient_shouldCallRepository() {
-        final Client client = mock(Client.class);
+        Client client = new Client();
+        client.setPassword(passwordEncoder.encode(USERNAME));
 
         clientService.saveClient(client);
 
@@ -113,5 +118,34 @@ class ClientServiceTest {
         clientService.deleteClient(USERNAME);
 
         verify(clientRepository).deleteByUsername(USERNAME);
+    }
+
+    @Test
+    void changeClientPassword_shouldChangePassword() {
+        Client client = new Client();
+        client.setPassword(passwordEncoder.encode("password"));
+        client.setId(ID);
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+
+        clientService.changeClientPassword(ID, "newPassword");
+
+        Client updatedClient = clientService.getClientById(ID).get();
+
+        assertTrue(passwordEncoder.matches("newPassword", updatedClient.getPassword()));
+    }
+
+    @Test
+    void changeClientUsername_shouldChangeUsername() {
+        Client client = new Client();
+        client.setUsername(USERNAME);
+        client.setId(ID);
+        client.setPassword(passwordEncoder.encode("password"));
+        when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
+
+        clientService.changeClientUsername(ID, "newUsername");
+
+        Client updatedClient = clientService.getClientById(ID).get();
+
+        assertThat(updatedClient.getUsername()).isEqualTo("newUsername");
     }
 }

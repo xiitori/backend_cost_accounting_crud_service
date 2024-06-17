@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.xiitori.crudservice.models.Expense;
 import ru.xiitori.crudservice.repositories.ExpenseRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
