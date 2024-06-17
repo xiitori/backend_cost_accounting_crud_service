@@ -1,4 +1,4 @@
-package ru.xiitori.crudservice.service;
+package ru.xiitori.crudservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,4 +31,6 @@ public class ClientDetailsService implements UserDetailsService {
 
         return new ClientDetails(client.get());
     }
+
+
 }

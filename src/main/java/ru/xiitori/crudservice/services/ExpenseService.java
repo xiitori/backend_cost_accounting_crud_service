@@ -1,4 +1,4 @@
-package ru.xiitori.crudservice.service;
+package ru.xiitori.crudservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.xiitori.crudservice.models.Expense;
 import ru.xiitori.crudservice.repositories.ExpenseRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +35,12 @@ public class ExpenseService {
 
     @Transactional
     public void saveExpense(Expense expense) {
+        expense.setMadeAt(LocalDateTime.now());
         expenseRepository.save(expense);
+    }
+
+    public List<Expense> getExpensesFromDateToDate(LocalDateTime from, LocalDateTime to) {
+        return expenseRepository.findExpensesByMadeAtBetween(from, to);
     }
 
     @Transactional
@@ -43,7 +49,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    public void updateExpense(Expense expense) {
+    public void updateExpense(int id, Expense expense) {
         expenseRepository.save(expense);
     }
 }

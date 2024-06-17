@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.xiitori.crudservice.dto.expense.AdminExpenseDTO;
 import ru.xiitori.crudservice.models.Expense;
-import ru.xiitori.crudservice.service.ExpenseService;
+import ru.xiitori.crudservice.services.ExpenseService;
 import ru.xiitori.crudservice.utils.exceptions.ExpenseNotFoundException;
 
 import java.util.List;

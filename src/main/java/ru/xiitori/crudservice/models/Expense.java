@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.xiitori.crudservice.models.types.ExpenseType;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "expense")
-public class Expense {
+public class Expense implements Note {
 
     @Id
     @Column(name = "id")
@@ -31,6 +33,9 @@ public class Expense {
 
     @Column(name = "value")
     private double value;
+
+    @Column(name = "made_at")
+    private LocalDateTime madeAt;
 
     public Expense(ExpenseType expenseType, String description, double value) {
         this.expenseType = expenseType;

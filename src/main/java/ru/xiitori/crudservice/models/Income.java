@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.xiitori.crudservice.models.types.IncomeType;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "income")
-public class Income {
+public class Income implements Note {
 
     @Id
     @Column(name = "id")
@@ -31,6 +33,9 @@ public class Income {
 
     @Column(name = "value")
     private double value;
+
+    @Column(name = "made_at")
+    private LocalDateTime madeAt;
 
     public Income(IncomeType incomeType, String description) {
         this.incomeType = incomeType;

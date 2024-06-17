@@ -1,13 +1,13 @@
-package ru.xiitori.crudservice.service;
+package ru.xiitori.crudservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.xiitori.crudservice.models.Income;
 import ru.xiitori.crudservice.repositories.IncomeRepository;
-import ru.xiitori.crudservice.security.ClientDetails;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,10 +45,11 @@ public class IncomeService {
     }
 
     @Transactional
-    public void updateIncome(Income income) {
-        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        income.setClient(clientDetails.getClient());
-
+    public void updateIncome(int id, Income income) {
         incomeRepository.save(income);
+    }
+
+    public List<Income> getIncomesFromDateToDate(LocalDateTime from, LocalDateTime to) {
+        return incomeRepository.findIncomesByMadeAtBetween(from, to);
     }
 }

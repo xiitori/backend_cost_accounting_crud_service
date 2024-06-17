@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.xiitori.crudservice.dto.income.AdminIncomeDTO;
 import ru.xiitori.crudservice.models.Income;
-import ru.xiitori.crudservice.service.IncomeService;
+import ru.xiitori.crudservice.services.IncomeService;
 import ru.xiitori.crudservice.utils.exceptions.IncomeNotFoundException;
 
 import java.util.List;

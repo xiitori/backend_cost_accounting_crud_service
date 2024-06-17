@@ -14,11 +14,12 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.xiitori.crudservice.dto.auth.LoginDTO;
+import ru.xiitori.crudservice.dto.auth.RegistrationDTO;
 import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.models.Client;
-import ru.xiitori.crudservice.service.ClientService;
+import ru.xiitori.crudservice.services.ClientService;
 import ru.xiitori.crudservice.utils.jwt.JWTUtils;
-import ru.xiitori.crudservice.validation.ClientDTOValidator;
+import ru.xiitori.crudservice.validation.RegistrationDTOValidator;
 
 import java.time.LocalDate;
 
@@ -34,10 +35,8 @@ public class AuthControllerTest {
     @Mock
     private ClientService clientService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     @Mock
-    private ClientDTOValidator clientDTOValidator;
+    private RegistrationDTOValidator clientDTOValidator;
 
     @Mock
     private ModelMapper modelMapper;
@@ -53,6 +52,8 @@ public class AuthControllerTest {
 
     private MockMvc mockMvc;
 
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
@@ -62,19 +63,19 @@ public class AuthControllerTest {
 
     @Test
     void registerTest() throws Exception {
-        ClientDTO clientDTO = new ClientDTO();
-        clientDTO.setUsername("dwvfdjvcwkjl");
-        clientDTO.setName("sdhucdjcdw");
-        clientDTO.setSurname("dcdwlubcsdcljk");
-        clientDTO.setLastname("cklwdckojnkdclqe");
-        clientDTO.setDateOfBirth(LocalDate.of(1998, 8, 2));
-        clientDTO.setEmail("sdcbe@gmail.com");
-        clientDTO.setPhoneNumber("+79356785632");
-        clientDTO.setPassword("test_password");
+        RegistrationDTO registrationDTO = new RegistrationDTO();
+        registrationDTO.setUsername("dwvfdjvcwkjl");
+        registrationDTO.setName("sdhucdjcdw");
+        registrationDTO.setSurname("dcdwlubcsdcljk");
+        registrationDTO.setLastname("cklwdckojnkdclqe");
+        registrationDTO.setDateOfBirth(LocalDate.of(1998, 8, 2));
+        registrationDTO.setEmail("sdcbe@gmail.com");
+        registrationDTO.setPhoneNumber("+79356785632");
+        registrationDTO.setPassword("test_password");
 
-        Mockito.when(modelMapper.map(any(), eq(Client.class))).thenReturn(new ModelMapper().map(clientDTO, Client.class));
+        Mockito.when(modelMapper.map(any(), eq(Client.class))).thenReturn(new ModelMapper().map(registrationDTO, Client.class));
 
-        String jsonClient = objectMapper.writeValueAsString(clientDTO);
+        String jsonClient = objectMapper.writeValueAsString(registrationDTO);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -86,6 +87,8 @@ public class AuthControllerTest {
     @Test
     void loginTest() throws Exception {
         LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUsername("test_username");
+        loginDTO.setPassword("test_password");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

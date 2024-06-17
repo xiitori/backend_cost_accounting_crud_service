@@ -13,14 +13,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.xiitori.crudservice.dto.auth.LoginDTO;
-import ru.xiitori.crudservice.dto.client.ClientDTO;
+import ru.xiitori.crudservice.dto.auth.RegistrationDTO;
 import ru.xiitori.crudservice.models.Client;
-import ru.xiitori.crudservice.service.ClientService;
+import ru.xiitori.crudservice.services.ClientService;
 import ru.xiitori.crudservice.utils.ErrorUtils;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
+import ru.xiitori.crudservice.utils.exceptions.LoginException;
 import ru.xiitori.crudservice.utils.exceptions.RegistrationException;
 import ru.xiitori.crudservice.utils.jwt.JWTUtils;
-import ru.xiitori.crudservice.validation.ClientDTOValidator;
+import ru.xiitori.crudservice.validation.RegistrationDTOValidator;
 
 import java.util.Map;
 
@@ -32,47 +33,47 @@ public class AuthController {
 
     private final ModelMapper mapper;
 
-    private final ClientDTOValidator clientDTOValidator;
+    private final RegistrationDTOValidator registrationDTOValidator;
 
     private final JWTUtils jwtUtils;
 
     private final DaoAuthenticationProvider daoAuthenticationProvider;
 
     @Autowired
-    public AuthController(ClientService clientService, ModelMapper mapper, ClientDTOValidator clientDTOValidator, JWTUtils jwtUtils, DaoAuthenticationProvider daoAuthenticationProvider) {
+    public AuthController(ClientService clientService, ModelMapper mapper, RegistrationDTOValidator registrationDTOValidator, JWTUtils jwtUtils, DaoAuthenticationProvider daoAuthenticationProvider) {
         this.clientService = clientService;
         this.mapper = mapper;
-        this.clientDTOValidator = clientDTOValidator;
+        this.registrationDTOValidator = registrationDTOValidator;
         this.jwtUtils = jwtUtils;
         this.daoAuthenticationProvider = daoAuthenticationProvider;
     }
 
     @PostMapping("/login")
-    public Map<String, String> performLogin(@RequestBody LoginDTO loginDTO) {
+    public Map<String, String> performLogin(@RequestBody @Valid LoginDTO loginDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new LoginException(ErrorUtils.createMessage(bindingResult));
+        }
+
         UsernamePasswordAuthenticationToken authInputToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(),
                         loginDTO.getPassword());
 
-        try {
-            Authentication authentication = daoAuthenticationProvider.authenticate(authInputToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (BadCredentialsException e) {
-            return Map.of("message", "Incorrect credentials!");
-        }
+        Authentication authentication = daoAuthenticationProvider.authenticate(authInputToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtUtils.createToken(loginDTO.getUsername());
         return Map.of("jwt-token", token);
     }
 
     @PostMapping("/register")
-    public Map<String, String> register(@RequestBody @Valid ClientDTO clientDTO, BindingResult bindingResult) {
-        clientDTOValidator.validate(clientDTO, bindingResult);
+    public Map<String, String> register(@RequestBody @Valid RegistrationDTO registrationDTO, BindingResult bindingResult) {
+        registrationDTOValidator.validate(registrationDTO, bindingResult);
 
         if (bindingResult.hasErrors()) {
             throw new RegistrationException(ErrorUtils.createMessage(bindingResult));
         }
 
-        Client client = mapper.map(clientDTO, Client.class);
+        Client client = mapper.map(registrationDTO, Client.class);
         clientService.saveClient(client);
         String token = jwtUtils.createToken(client.getUsername());
 
@@ -82,5 +83,15 @@ public class AuthController {
     @ExceptionHandler(value = RegistrationException.class)
     public ResponseEntity<ExceptionResponse> handleException(RegistrationException ex) {
         return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionResponse> handleException(BadCredentialsException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(LoginException.class)
+    public ResponseEntity<ExceptionResponse> handleException(LoginException ex) {
+        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.UNAUTHORIZED);
     }
 }

@@ -15,7 +15,7 @@ public class ExceptionResponse {
     private Timestamp timestamp;
 
     public ExceptionResponse(Exception e) {
-        this.message = e.getClass().getSimpleName() + " - " + e.getMessage();
+        this.message = e.getClass().getSimpleName() + ": " + e.getMessage();
         this.timestamp = Timestamp.from(Instant.now());
     }
 }

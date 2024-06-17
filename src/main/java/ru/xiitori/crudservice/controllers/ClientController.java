@@ -4,21 +4,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.crudservice.dto.client.ClientDTO;
 import ru.xiitori.crudservice.dto.client.ClientInfoDTO;
 import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.income.IncomeDTO;
 import ru.xiitori.crudservice.models.Client;
-import ru.xiitori.crudservice.service.ClientService;
-import ru.xiitori.crudservice.service.ExpenseService;
-import ru.xiitori.crudservice.service.IncomeService;
-import ru.xiitori.crudservice.utils.ErrorUtils;
+import ru.xiitori.crudservice.services.ClientService;
+import ru.xiitori.crudservice.services.ExpenseService;
+import ru.xiitori.crudservice.services.IncomeService;
 import ru.xiitori.crudservice.utils.ExceptionResponse;
 import ru.xiitori.crudservice.utils.exceptions.ClientNotFoundException;
-import ru.xiitori.crudservice.utils.exceptions.RegistrationException;
-import ru.xiitori.crudservice.validation.ClientDTOValidator;
+import ru.xiitori.crudservice.utils.exceptions.UpdateException;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,16 +29,13 @@ public class ClientController {
 
     private final ModelMapper mapper;
 
-    private final ClientDTOValidator clientDTOValidator;
-
     private final IncomeService incomeService;
 
     @Autowired
-    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, ClientDTOValidator clientDTOValidator, IncomeService incomeService) {
+    public ClientController(ClientService clientService, ExpenseService expenseService, ModelMapper mapper, IncomeService incomeService) {
         this.clientService = clientService;
         this.expenseService = expenseService;
         this.mapper = mapper;
-        this.clientDTOValidator = clientDTOValidator;
         this.incomeService = incomeService;
     }
 
@@ -74,29 +67,7 @@ public class ClientController {
                 .map(income -> mapper.map(income, IncomeDTO.class)).toList();
     }
 
-    //TODO добавить другую валидацию на апдейт, либо внутри прошлой достать текущего клиента из контекста
-    @PostMapping("/{id}")
-    public ResponseEntity<?> updateClient(@PathVariable("id") int id, @RequestBody ClientDTO clientDTO,
-                                          BindingResult result) {
-        clientDTOValidator.validate(clientDTO, result);
-
-        if (result.hasErrors()) {
-            throw new RegistrationException(ErrorUtils.createMessage(result));
-        }
-
-        Optional<Client> clientToUpdate = clientService.getClientById(id);
-
-        if (clientToUpdate.isEmpty()) {
-            throw new ClientNotFoundException("Client with id " + id + " not found");
-        }
-
-        Client client = mapper.map(clientDTO, Client.class);
-        clientService.updateClient(client, id);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{username}")
+    @DeleteMapping("/username/{username}")
     public ResponseEntity<?> deleteClientByUsername(@PathVariable("username") String username) {
         clientService.deleteClient(username);
 
