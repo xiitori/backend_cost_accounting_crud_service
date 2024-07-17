@@ -49,7 +49,7 @@ public class IncomeService {
         incomeRepository.save(income);
     }
 
-    public List<Income> getIncomesFromDateToDate(LocalDateTime from, LocalDateTime to) {
-        return incomeRepository.findIncomesByMadeAtBetween(from, to);
+    public List<Income> getIncomesFromDateToDate(int id, LocalDateTime from, LocalDateTime to) {
+        return incomeRepository.findIncomesByClient_IdAndMadeAtBetween(id, from, to);
     }
 }
