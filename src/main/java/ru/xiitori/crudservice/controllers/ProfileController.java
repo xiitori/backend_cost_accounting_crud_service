@@ -13,6 +13,7 @@ import ru.xiitori.crudservice.dto.expense.ExpenseAddDTO;
 import ru.xiitori.crudservice.dto.expense.ExpenseDTO;
 import ru.xiitori.crudservice.dto.income.IncomeAddDTO;
 import ru.xiitori.crudservice.dto.income.IncomeDTO;
+import ru.xiitori.crudservice.dto.statistics.StatisticsDTO;
 import ru.xiitori.crudservice.models.Client;
 import ru.xiitori.crudservice.models.Expense;
 import ru.xiitori.crudservice.models.Income;
@@ -20,15 +21,12 @@ import ru.xiitori.crudservice.security.ClientDetails;
 import ru.xiitori.crudservice.services.ClientService;
 import ru.xiitori.crudservice.services.ExpenseService;
 import ru.xiitori.crudservice.services.IncomeService;
-import ru.xiitori.crudservice.utils.ExceptionResponse;
-import ru.xiitori.crudservice.utils.exceptions.EntityNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.ExpenseNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.IncomeNotFoundException;
 import ru.xiitori.crudservice.utils.exceptions.UpdateException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -182,16 +180,15 @@ public class ProfileController {
     }
 
     @GetMapping("/statistics")
-    public ResponseEntity<?> getStatistics(
+    public StatisticsDTO getStatistics(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH-mm-ss") LocalDateTime from,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH-mm-ss") LocalDateTime to) {
-        List<Expense> expenses = expenseService.getExpensesFromDateToDate(from, to);
-        List<Income> incomes = incomeService.getIncomesFromDateToDate(from, to);
+        int id = ((ClientDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClient().getId();
+        List<Expense> expenses = expenseService.getExpensesFromDateToDate(id, from, to);
+        List<Income> incomes = incomeService.getIncomesFromDateToDate(id, from, to);
 
-        return new ResponseEntity<>(Map.of(
-                "expenses", expenses.stream().map(expense -> modelMapper.map(expense, ExpenseDTO.class)),
-                "incomes", incomes.stream().map(income -> modelMapper.map(income, IncomeDTO.class))),
-                HttpStatus.OK);
+        return new StatisticsDTO(expenses.stream().map(expense -> modelMapper.map(expense, ExpenseDTO.class)).toList(),
+                incomes.stream().map(income -> modelMapper.map(income, IncomeDTO.class)).toList());
     }
 
     @DeleteMapping("/incomes/{id}")
@@ -199,10 +196,5 @@ public class ProfileController {
         incomeService.deleteIncomeById(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<?> handleException(EntityNotFoundException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
     }
 }

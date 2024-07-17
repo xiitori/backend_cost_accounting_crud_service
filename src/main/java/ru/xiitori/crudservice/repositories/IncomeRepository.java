@@ -13,5 +13,5 @@ import java.util.List;
 public interface IncomeRepository extends JpaRepository<Income, Integer> {
     List<Income> findAllByClient_Id(int id);
 
-    List<Income> findIncomesByMadeAtBetween(LocalDateTime start, LocalDateTime end);
+    List<Income> findIncomesByClient_IdAndMadeAtBetween(int id, LocalDateTime start, LocalDateTime end);
 }

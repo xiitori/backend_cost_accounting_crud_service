@@ -39,8 +39,8 @@ public class ExpenseService {
         expenseRepository.save(expense);
     }
 
-    public List<Expense> getExpensesFromDateToDate(LocalDateTime from, LocalDateTime to) {
-        return expenseRepository.findExpensesByMadeAtBetween(from, to);
+    public List<Expense> getExpensesFromDateToDate(int id, LocalDateTime from, LocalDateTime to) {
+        return expenseRepository.findExpensesByClient_IdAndMadeAtBetween(id, from, to);
     }
 
     @Transactional

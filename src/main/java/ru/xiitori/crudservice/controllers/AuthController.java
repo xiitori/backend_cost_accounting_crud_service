@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,8 +66,8 @@ public class AuthController {
         return Map.of("jwt-token", token);
     }
 
-    @PostMapping("/register")
-    public Map<String, String> register(@RequestBody @Valid RegistrationDTO registrationDTO, BindingResult bindingResult) {
+    @PostMapping(path = "/register")
+    public Map<String, String> register(@Valid @RequestBody RegistrationDTO registrationDTO, BindingResult bindingResult) {
         registrationDTOValidator.validate(registrationDTO, bindingResult);
 
         if (bindingResult.hasErrors()) {
@@ -78,20 +79,5 @@ public class AuthController {
         String token = jwtUtils.createToken(client.getUsername());
 
         return Map.of("jwt-token", token);
-    }
-
-    @ExceptionHandler(value = RegistrationException.class)
-    public ResponseEntity<ExceptionResponse> handleException(RegistrationException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ExceptionResponse> handleException(BadCredentialsException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(LoginException.class)
-    public ResponseEntity<ExceptionResponse> handleException(LoginException ex) {
-        return new ResponseEntity<>(new ExceptionResponse(ex), HttpStatus.UNAUTHORIZED);
     }
 }
